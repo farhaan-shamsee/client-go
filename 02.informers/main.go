@@ -8,7 +8,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -19,7 +18,7 @@ import (
 func main() {
 	// default to $HOME/.kube/config instead of a literal ~ which isn't expanded by Go
 	home, _ := os.UserHomeDir()
-	defaultKube := filepath.Join(home, ".kube", "configs")
+	defaultKube := filepath.Join(home, ".kube", "config")
 	kubeconfig := flag.String("kubeconfig", defaultKube, "absolute path to the kubeconfig file")
 	ctx := context.Background()
 	
@@ -56,9 +55,9 @@ func main() {
 	})
 
 	// Start the informer factory
-	informerFactory.Start(wait.NeverStop)
+	informerFactory.Start(ctx.Done())
 	// Wait for the caches in the in-memory cache to be synced before using the informer
-	informerFactory.WaitForCacheSync(wait.NeverStop)
+	informerFactory.WaitForCacheSync(ctx.Done())
 
 	// Lister is provided by the informer to list resources from the local cache.
 	pod, err := podInformer.Lister().Pods("default").Get("default")
