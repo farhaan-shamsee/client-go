@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: simple-client-go
+  name: simple-client-go
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-client-go
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: simple-client-go
+    spec:
+      containers:
+      - image: farhaanshamsee/simple-client-go:0.1.1
+        name: simple-client-go
+        imagePullPolicy: Always
+        resources: {}
