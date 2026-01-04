@@ -35,6 +35,7 @@ func (in *Pod) DeepCopyObject() runtime.Object {
 Reference: [YouTube Video](https://youtu.be/2s_dOZB7ebo?si=OQPIQipBiAKSKIZx)
 
 ## Informers
+
 - <img width="1534" height="542" alt="image" src="https://github.com/user-attachments/assets/66bf11d9-65b8-4df8-b1b4-4a8fd64b3b71" />
 
 - Informers provide a high-level API to watch and cache Kubernetes resources.
@@ -49,6 +50,7 @@ Reference: [YouTube Video](https://youtu.be/2s_dOZB7ebo?si=OQPIQipBiAKSKIZx)
 - `NewFilteredSharedInformerFactory()` allows us to create informers with custom list options, like filtering by label selectors.
 
 ## Queues
+
 - <img width="1534" height="542" alt="image" src="https://github.com/user-attachments/assets/1a28877e-ef6d-486c-93a5-6c43004426fa" />
 - Informers use work queues to manage the processing of events.
 - When an event occurs (add, update, delete), the informer adds a key (usually namespace/name) to the work queue.
