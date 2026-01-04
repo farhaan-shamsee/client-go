@@ -55,3 +55,11 @@ Reference: [YouTube Video](https://youtu.be/2s_dOZB7ebo?si=OQPIQipBiAKSKIZx)
 - A separate worker goroutine processes items from the work queue.
 - The worker retrieves the resource from the informer's cache using the key and performs the necessary processing.
 - Using a work queue allows for rate limiting, retries, and batching of events, improving efficiency and reliability.
+- 
+
+## Controller Development
+
+- <img width="1265" height="511" alt="image" src="https://github.com/user-attachments/assets/b343542f-2635-44ce-a41f-bfecc0bb305a" />
+
+- More here
+
