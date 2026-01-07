@@ -34,6 +34,26 @@ func (in *Pod) DeepCopyObject() runtime.Object {
 
 Reference: [YouTube Video](https://youtu.be/2s_dOZB7ebo?si=OQPIQipBiAKSKIZx)
 
+## Typed vs Dynamic Client
+
+- Typed clients are generated from the OpenAPI specification and provide a strongly typed interface for interacting with Kubernetes resources.
+- Dynamic clients use the unstructured API and provide a more flexible, but less type-safe, way to interact with Kubernetes resources.
+- `clientSet, err := kubernetes.NewForConfig(config)` this gives us typed-client.
+
+```go
+pods, err := clientSet.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
+```
+
+- `dynamicClient, err := dynamic.NewForConfig(config)` this gives us dynamic-client.
+
+    ```go
+    resources, err := dynamicClient.Resource(schema.GroupVersionResource{
+        Group: "helm.cattle.io",
+        Version: "v1",
+        Resource: "helmcharts",
+    }).List(context.Background(), metav1.ListOptions{})
+    ```
+
 ## Informers
 
 - <img width="1534" height="542" alt="image" src="https://github.com/user-attachments/assets/66bf11d9-65b8-4df8-b1b4-4a8fd64b3b71" />
@@ -63,5 +83,42 @@ Reference: [YouTube Video](https://youtu.be/2s_dOZB7ebo?si=OQPIQipBiAKSKIZx)
 
 - <img width="1265" height="511" alt="image" src="https://github.com/user-attachments/assets/b343542f-2635-44ce-a41f-bfecc0bb305a" />
 
-- More here
+- We create a channel in controller to signal when to stop the controller. And we make it run until we receive a signal on that channel. If we don't pass any signal in the channel, the controller will run indefinitely.
 
+
+## RestMapper
+
+- restmapper helps us map GroupVersionKinds (GVKs) to the appropriate REST endpoints in the Kubernetes API.
+- It is used by dynamic clients and other components that need to interact with Kubernetes resources without knowing their exact API paths.
+- Package: `k8s.io/apimachinery/pkg/api/meta/restmapper`
+
+## API Machinery
+
+- `GVK`: Group, Version, Kind
+- Deployment is the Kind.
+- `GVR`: Group, Version, Resource
+- Resource: plural, lowercase form of Kind.
+- deployments is the Resource for Deployment Kind.
+- RESTMapper maps GVKs to GVRs and vice versa.
+
+## Scheme
+
+- The scheme defines the structure and validation rules for API objects.
+- It is used to ensure that objects conform to the expected format and contain all required fields.
+- Package: `k8s.io/apimachinery/pkg/runtime/schema`
+- We can use ObjectKinds() method from Scheme to get GVKs for a given object.
+
+    ```go
+    gvks, _, err := scheme.ObjectKinds(obj)
+    if err != nil {
+        return nil, err
+    }
+    if len(gvks) == 0 {
+        return nil, fmt.Errorf("no GVK found for object")
+    }
+    return &gvks[0], nil
+    ```
+
+- This will only work if the object is a registered type in the scheme. We can use AddKnownTypes() method to register custom types.
+
+SO the path is: Go struct -> Use AddKnownTypes() to register the struct in Scheme -> Now we can use ObjectKinds() to get GVK for the struct -> Use RESTMapper to map GVK to GVR -> Use GVR to interact with the resource via dynamic client.

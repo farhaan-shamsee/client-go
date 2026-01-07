@@ -16,7 +16,7 @@ import (
 func main() {
 	// default to $HOME/.kube/config instead of a literal ~ which isn't expanded by Go
 	home, _ := os.UserHomeDir()
-	defaultKube := filepath.Join(home, ".kube", "configs")
+	defaultKube := filepath.Join(home, ".kube", "config")
 	kubeconfig := flag.String("kubeconfig", defaultKube, "absolute path to the kubeconfig file")
 	ctx := context.Background()
 	
@@ -30,6 +30,8 @@ func main() {
 			return
 		}
 	}
+
+	// NewForCOnfig gives typed-client.
 	
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
@@ -52,5 +54,13 @@ func main() {
 	fmt.Println("Deployments:===============")
 	for _, deploy := range deployments.Items {
 		fmt.Printf("%v\n", deploy.Name)
+	}
+
+	ingress, err := clientSet.NetworkingV1().Ingresses("default").List(ctx, metav1.ListOptions{})
+	if err != nil {
+		fmt.Errorf("cant get ingresses: %w", err)
+	}
+	for _, ingressList := range ingress.Items {
+		fmt.Println(ingressList.Name)
 	}
 }
