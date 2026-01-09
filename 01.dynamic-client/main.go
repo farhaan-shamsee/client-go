@@ -20,7 +20,7 @@ func run() error {
 		fmt.Errorf("Can not get homedir %w", err)
 	}
 	defaultKubeconfigPath := filepath.Join(home, ".kube", "config")
-	configFlag := flag.String("kubeconfig",defaultKubeconfigPath,"path of kubecionfig")
+	configFlag := flag.String("kubeconfig",defaultKubeconfigPath,"path of kubeconfig")
 	config, err := clientcmd.BuildConfigFromFlags("",*configFlag)
 	if err != nil {
 		return fmt.Errorf("Can not get config %w", err)

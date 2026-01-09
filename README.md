@@ -91,6 +91,7 @@ pods, err := clientSet.CoreV1().Pods("default").List(ctx, metav1.ListOptions{})
 - restmapper helps us map GroupVersionKinds (GVKs) to the appropriate REST endpoints in the Kubernetes API.
 - It is used by dynamic clients and other components that need to interact with Kubernetes resources without knowing their exact API paths.
 - Package: `k8s.io/apimachinery/pkg/api/meta/restmapper`
+- `m, err := cmdutil.NewFactory(matchVersionFlags).ToRESTMapper()`
 
 ## API Machinery
 
