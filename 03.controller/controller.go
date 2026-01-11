@@ -10,9 +10,7 @@ import (
 	networkingv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/informers"
 	appsinformers "k8s.io/client-go/informers/apps/v1"
-	"k8s.io/client-go/informers/networking"
 	"k8s.io/client-go/kubernetes"
 	appslisters "k8s.io/client-go/listers/apps/v1"
 	"k8s.io/client-go/tools/cache"
@@ -66,8 +64,6 @@ func (c *controller) worker() {
 	}
 }
 
-
-
 func (c *controller) processItem() bool {
 	item, shutdown := c.queue.Get()
 	if shutdown {
@@ -94,7 +90,6 @@ func (c *controller) processItem() bool {
 	return true
 }
 
-
 // business logic
 func (c *controller) syncDeployment(ns, name string) error {
 
@@ -102,7 +97,6 @@ func (c *controller) syncDeployment(ns, name string) error {
 	if err != nil {
 		fmt.Println("getting deployment%s \n", err.Error())
 	}
-
 
 	// create service
 	// have to modify this to figure out port our deploy is listening on
@@ -122,7 +116,6 @@ func (c *controller) syncDeployment(ns, name string) error {
 		},
 	}
 
-
 	_, err = c.clientSet.CoreV1().Services(ns).Create(context.Background(), &svc, metav1.CreateOptions{})
 	if err != nil {
 		fmt.Println("syncing deployment%s \n", err.Error())
@@ -130,13 +123,11 @@ func (c *controller) syncDeployment(ns, name string) error {
 	// create ingress
 	ing := networkingv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: dep.Name,
+			Name:      dep.Name,
 			Namespace: ns,
 		},
 		Spec: networkingv1.IngressSpec{
-			Rules: []networkingv1.IngressRule{
-				
-			},
+			Rules: []networkingv1.IngressRule{},
 		},
 	}
 	return nil

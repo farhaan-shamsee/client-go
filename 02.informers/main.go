@@ -60,7 +60,7 @@ func main() {
 	informerFactory.WaitForCacheSync(ctx.Done())
 
 	// Lister is provided by the informer to list resources from the local cache.
-	pod, err := podInformer.Lister().Pods("default").Get("default")
+	pod, err := podInformer.Lister().Pods("kube-system").Get("coredns-ccb96694c-ks6vz")
 	if err != nil {
 		fmt.Printf("Error %s getting pod\n", err.Error())
 		return

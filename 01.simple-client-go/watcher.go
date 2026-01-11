@@ -1,17 +1,16 @@
 package main
 
 import (
-	// "context"
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
-	"time"
 
-	"k8s.io/client-go/informers"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	// "k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -20,8 +19,8 @@ func main() {
 	home, _ := os.UserHomeDir()
 	defaultKube := filepath.Join(home, ".kube", "config")
 	kubeconfig := flag.String("kubeconfig", defaultKube, "absolute path to the kubeconfig file")
-	// ctx := context.Background()
-	
+	ctx := context.Background()
+
 	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
 	if err != nil {
 		fmt.Printf("Error %s building config from flag\n", err.Error())
@@ -32,17 +31,28 @@ func main() {
 			return
 		}
 	}
-	
+
+	// NewForCOnfig gives typed-client.
+
 	clientSet, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		fmt.Printf("Error %s creating Kubernetes client\n", err.Error())
 	}
 
-	ch := make(chan struct{})
-	informers := informers.NewSharedInformerFactory(clientSet, 10*time.Minute)
-	// this only returns controller struct
-	c := newController(clientSet, informers.Apps().V1().Deployments())
-	informers.Start(ch)
-	c.run(ch)
-	fmt.Println(informers)
+	// Watch pods in the default namespace
+	watcher, err := clientSet.CoreV1().Pods("default").Watch(ctx, metav1.ListOptions{})
+	if err != nil {
+		fmt.Printf("Error %s watching pods\n", err.Error())
+		return
+	}
+	defer watcher.Stop()
+
+	fmt.Println("Watching pods in 'default' namespace...")
+	fmt.Println("Press Ctrl+C to stop")
+
+	// Process watch events
+	for event := range watcher.ResultChan() {
+		pod := event.Object.(*corev1.Pod)
+		fmt.Printf("Event: %s - Pod: %s\n", event.Type, pod.Name)
+	}
 }

@@ -2,40 +2,30 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
 
-	"log"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
+
 	"k8s.io/client-go/tools/clientcmd"
+	cmdutil "k8s.io/kubectl/pkg/cmd/util"
 )
 
 func main() {
 	home, err := os.UserHomeDir()
+	ctx := context.Background()
 	if err != nil {
-		log.Panic("cant find home directory", err)
+		fmt.Println("Error getting the homedir:", err)
+		os.Exit(1)
 	}
-	configFilePath := filepath.Join(home, ".kube", "config")
-	kubeconfig := flag.String("kubeconfig", configFilePath, "path to kubeconfig file")
-
-	config, err := clientcmd.BuildConfigFromFlags("", *kubeconfig)
+	kubeconfigPath := filepath.Join(home,".kube","config")
+	config, err := clientcmd.BuildConfigFromFlags("",kubeconfigPath)
 	if err != nil {
-		log.Fatal(err)
+		fmt.Println("Error getting the config:", err)
+		os.Exit(1)
 	}
-
-	clientSet, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		log.Fatal(err)
-	}
-	deployments,err := clientSet.AppsV1().Deployments("kube-system").List(context.Background(), metav1.ListOptions{})
-	if err != nil {
-		log.Fatal(err)
-	}
-	for _, deps := range deployments.Items{
-		fmt.Println(deps.Name)
-	}
+	
+	m, err := cmdutil.NewFactory(config).ToRESTMapper()
+	
 }
